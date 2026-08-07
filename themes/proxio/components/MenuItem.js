@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import SmartLink from '@/components/SmartLink'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 
@@ -7,7 +7,7 @@ import { useState } from 'react'
  * @param {*} param0
  * @returns
  */
-export const MenuItem = ({ link }) => {
+export const MenuItem = ({ link, isOpen, toggleOpen }) => {
   const hasSubMenu = link?.subMenus?.length > 0
   const router = useRouter()
 
@@ -15,15 +15,21 @@ export const MenuItem = ({ link }) => {
   const [isSubMenuOpen, setIsSubMenuOpen] = useState(false)
 
   const toggleSubMenu = () => {
-    setIsSubMenuOpen(prev => !prev) // 切换子菜单状态
+    if (toggleOpen) {
+      toggleOpen()
+    } else {
+      setIsSubMenuOpen(prev => !prev) // 切换子菜单状态
+    }
   }
+
+  const open = isOpen !== undefined ? isOpen : isSubMenuOpen
 
   return (
     <>
       {/* 普通 MenuItem */}
       {!hasSubMenu && (
         <li className='group relative whitespace-nowrap'>
-          <Link
+          <SmartLink
             href={link?.href}
             target={link?.target}
             className={`ud-menu-scroll mx-8 flex py-2 text-sm font-medium text-dark group-hover:text-primary dark:text-white lg:mr-0 lg:inline-flex lg:px-0 lg:py-6 ${
@@ -33,7 +39,7 @@ export const MenuItem = ({ link }) => {
             } lg:group-hover:opacity-70`}>
             {link?.icon && <i className={link.icon + ' mr-2 my-auto'} />}
             {link?.name}
-          </Link>
+          </SmartLink>
         </li>
       )}
 
@@ -66,12 +72,12 @@ export const MenuItem = ({ link }) => {
           {/* 子菜单 */}
           <div
             className={`submenu dark:border-gray-600 relative left-0 top-full w-[250px] rounded-sm bg-white p-4 transition-all duration-300 dark:bg-dark-2 lg:absolute lg:shadow-lg ${
-              isSubMenuOpen
+              open
                 ? 'block opacity-100 visible'
                 : 'hidden opacity-0 invisible'
             }`}>
             {link.subMenus.map((sLink, index) => (
-              <Link
+              <SmartLink
                 key={index}
                 href={sLink.href}
                 target={link?.target}
@@ -81,7 +87,7 @@ export const MenuItem = ({ link }) => {
                   {link?.icon && <i className={sLink.icon + ' mr-2 my-auto'} />}{' '}
                   {sLink.title}
                 </span>
-              </Link>
+              </SmartLink>
             ))}
           </div>
         </li>

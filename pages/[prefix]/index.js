@@ -1,18 +1,25 @@
 import BLOG from '@/blog.config'
 import useNotification from '@/components/Notification'
-import OpenWrite from '@/components/OpenWrite'
+import TechGrow from '@/components/TechGrow'
 import { siteConfig } from '@/lib/config'
-import { getGlobalData, getPost } from '@/lib/db/getSiteData'
+import { resolvePostProps } from '@/lib/db/SiteDataApi'
 import { useGlobal } from '@/lib/global'
-import { getPageTableOfContents } from '@/lib/notion/getPageTableOfContents'
-import { getPasswordQuery } from '@/lib/password'
-import { checkStrIsNotionId, checkStrIsUuid } from '@/lib/utils'
-import { checkSlugHasNoSlash, processPostData } from '@/lib/utils/post'
+import { getPageTableOfContents } from '@/lib/db/notion/getPageTableOfContents'
+import {
+  getPasswordQuery,
+  getPasswordStoragePath,
+  sha256Digest
+} from '@/lib/utils/password'
+import { checkSlugHasNoSlash } from '@/lib/utils/post'
 import { DynamicLayout } from '@/themes/theme'
 import md5 from 'js-md5'
 import { useRouter } from 'next/router'
-import { idToUuid } from 'notion-utils'
+import PropTypes from 'prop-types'
 import { useEffect, useState } from 'react'
+import { getStaticPathsBase } from '@/lib/build/staticPaths'
+import { isExport } from '@/lib/utils/buildMode'
+
+const isStaticExport = process.env.EXPORT === 'true'
 
 /**
  * 根据notion的slug访问页面
@@ -37,11 +44,15 @@ const Slug = props => {
     if (!post) {
       return false
     }
-    const encrypt = md5(post?.slug + passInput)
-    if (passInput && encrypt === post?.password) {
+    const legacy = md5(String(post?.slug ?? '') + passInput)
+    const nextHash = sha256Digest(passInput)
+    if (nextHash === post?.password || legacy === post?.password) {
       setLock(false)
-      // 输入密码存入localStorage，下次自动提交
-      localStorage.setItem('password_' + router.asPath, passInput)
+      // 输入密码存入 localStorage；键仅含 pathname，避免 query/hash 导致读写不一致（PR #3389）
+      localStorage.setItem(
+        'password_' + getPasswordStoragePath(router.asPath),
+        passInput
+      )
       showNotification(locale.COMMON.ARTICLE_UNLOCK_TIPS) // 设置解锁成功提示显示
       return true
     }
@@ -66,7 +77,9 @@ const Slug = props => {
         }
       }
     }
-  }, [post])
+    // validPassword 内部依赖 post / router 同时也已在依赖里
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [post, router.asPath])
 
   // 文章加载
   useEffect(() => {
@@ -80,7 +93,7 @@ const Slug = props => {
       )
       post.toc = getPageTableOfContents(post, post.blockMap)
     }
-  }, [router, lock])
+  }, [router, lock, post])
 
   props = { ...props, lock, validPassword }
   const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
@@ -91,78 +104,49 @@ const Slug = props => {
       {/* 解锁密码提示框 */}
       {post?.password && post?.password !== '' && !lock && <Notification />}
       {/* 导流工具 */}
-      <OpenWrite />
+      <TechGrow lock={lock} />
     </>
   )
 }
 
+Slug.propTypes = {
+  post: PropTypes.shape({
+    id: PropTypes.string,
+    slug: PropTypes.string,
+    password: PropTypes.string,
+    content: PropTypes.array,
+    toc: PropTypes.array,
+    blockMap: PropTypes.shape({
+      block: PropTypes.object
+    })
+  }),
+  NOTION_CONFIG: PropTypes.object
+}
+
 export async function getStaticPaths() {
-  if (!BLOG.isProd) {
-    return {
-      paths: [],
-      fallback: true
-    }
-  }
-
-  const from = 'slug-paths'
-  const { allPages } = await getGlobalData({ from })
-  const paths = allPages
-    ?.filter(row => checkSlugHasNoSlash(row))
-    .map(row => ({ params: { prefix: row.slug } }))
-  
-  console.log('[PREFIX-PATHS] found', paths?.length, 'paths for prefix. Examples:', paths?.slice(0, 3));
-
-  return {
-    paths: paths,
-    fallback: true
-  }
+  return getStaticPathsBase({
+    from: 'slug-paths',
+    filterFn: row => checkSlugHasNoSlash(row),
+    mapPageToParams: row => ({ params: { prefix: row.slug } })
+  })
 }
 
 export async function getStaticProps({ params: { prefix }, locale }) {
-  const cleanPrefix = prefix.replace(/\.html$/, '')
-  let fullSlug = cleanPrefix
-  const from = `slug-props-${fullSlug}`
-  const props = await getGlobalData({ from, locale })
-  if (siteConfig('PSEUDO_STATIC', false, props.NOTION_CONFIG)) {
-    if (!fullSlug.endsWith('.html')) {
-      fullSlug += '.html'
-    }
-  }
-
-  // 在列表内查找文章
-  props.post = props?.allPages?.find(p => {
-    const postSlug = p.slug?.startsWith('/') ? p.slug.substring(1) : p.slug
-    return (
-      p.type.indexOf('Menu') < 0 &&
-      (postSlug === cleanPrefix || p.id === idToUuid(cleanPrefix))
-    )
+  const props = await resolvePostProps({
+    prefix,
+    locale,
   })
 
-  console.log(`[getStaticProps] cleanPrefix: ${cleanPrefix}, found post: ${!!props.post}, isFallback: ${false}`)
-
-  // 处理非列表内文章的内信息
-  if (!props?.post) {
-    const pageId = cleanPrefix
-    if (pageId.length >= 32 && (checkStrIsUuid(pageId) || checkStrIsNotionId(pageId))) {
-      const post = await getPost(pageId)
-      props.post = post
-    }
-  }
-  if (!props?.post) {
-    // 无法获取文章
-    props.post = null
-  } else {
-    await processPostData(props, from)
-  }
   return {
     props,
-    revalidate: process.env.EXPORT
+    revalidate: isStaticExport
       ? undefined
       : siteConfig(
-          'NEXT_REVALIDATE_SECOND',
-          BLOG.NEXT_REVALIDATE_SECOND,
-          props.NOTION_CONFIG
-        )
+        'NEXT_REVALIDATE_SECOND',
+        BLOG.NEXT_REVALIDATE_SECOND,
+        props.NOTION_CONFIG
+      ),
+    notFound: !props.post
   }
 }
 

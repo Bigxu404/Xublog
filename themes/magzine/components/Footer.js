@@ -7,7 +7,7 @@ import LazyImage from '@/components/LazyImage'
 import PoweredBy from '@/components/PoweredBy'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
-import Link from 'next/link'
+import SmartLink from '@/components/SmartLink'
 import CONFIG from '../config'
 import SocialButton from './SocialButton'
 
@@ -31,6 +31,7 @@ const Footer = ({ title }) => {
               src={siteInfo?.icon}
               className='rounded-full'
               width={40}
+              height={40}
               alt={siteConfig('AUTHOR')}
             />
             <div>
@@ -56,9 +57,9 @@ const Footer = ({ title }) => {
                     {group?.menus?.map((menu, index) => {
                       return (
                         <div key={index}>
-                          <Link href={menu.href} className='hover:underline'>
+                          <SmartLink href={menu.href} className='hover:underline'>
                             {menu.title}
-                          </Link>
+                          </SmartLink>
                         </div>
                       )
                     })}

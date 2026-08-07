@@ -7,7 +7,7 @@ import { useGlobal } from '@/lib/global'
 import { isBrowser } from '@/lib/utils'
 import { Transition } from '@headlessui/react'
 import dynamic from 'next/dynamic'
-import Link from 'next/link'
+import SmartLink from '@/components/SmartLink'
 import { useRouter } from 'next/router'
 import { createContext, useContext, useEffect, useRef } from 'react'
 import ArticleAdjacent from './components/ArticleAdjacent'
@@ -15,7 +15,6 @@ import ArticleCopyright from './components/ArticleCopyright'
 import { ArticleLock } from './components/ArticleLock'
 import ArticleRecommend from './components/ArticleRecommend'
 import BlogPostArchive from './components/BlogPostArchive'
-import BlogPostCard from './components/BlogPostCard'
 import BlogPostListPage from './components/BlogPostListPage'
 import BlogPostListScroll from './components/BlogPostListScroll'
 import ButtonJumpToComment from './components/ButtonJumpToComment'
@@ -26,14 +25,13 @@ import Header from './components/Header'
 import Hero from './components/Hero'
 import PostHero from './components/PostHero'
 import RightFloatArea from './components/RightFloatArea'
-import SearchButton from './components/SearchButton'
-import SearchInput from './components/SearchInput'
 import SearchNav from './components/SearchNav'
 import SideRight from './components/SideRight'
 import SlotBar from './components/SlotBar'
 import TagItemMini from './components/TagItemMini'
 import TocDrawer from './components/TocDrawer'
 import TocDrawerButton from './components/TocDrawerButton'
+import ArticleSwitchPlaceholder from './components/ArticleSwitchPlaceholder'
 import CONFIG from './config'
 import { Style } from './style'
 
@@ -57,6 +55,14 @@ const LayoutBase = props => {
   const { onLoading, fullWidth } = useGlobal()
   const router = useRouter()
   const showRandomButton = siteConfig('HEXO_MENU_RANDOM', false, CONFIG)
+  const isArticleSlugPage = router.pathname === '/[prefix]/[slug]'
+  const hexoArticleRouteLoading = siteConfig(
+    'HEXO_ARTICLE_ROUTE_LOADING',
+    true,
+    CONFIG
+  )
+  const showArticleSwitchPlaceholder =
+    hexoArticleRouteLoading && isArticleSlugPage && onLoading
 
   const headerSlot = post ? (
     <PostHero {...props} />
@@ -99,20 +105,18 @@ const LayoutBase = props => {
         <Header {...props} />
 
         {/* 顶部嵌入 */}
-        <div className='header-wrapper'>
-          <Transition
-            show={!onLoading}
-            appear={true}
-            enter='transition ease-in-out duration-700 transform order-first'
-            enterFrom='opacity-0 -translate-y-16'
-            enterTo='opacity-100'
-            leave='transition ease-in-out duration-300 transform'
-            leaveFrom='opacity-100'
-            leaveTo='opacity-0 translate-y-16'
-            unmount={false}>
-            {headerSlot}
-          </Transition>
-        </div>
+        <Transition
+          show={!onLoading}
+          appear={true}
+          enter='transition ease-in-out duration-700 transform order-first'
+          enterFrom='opacity-0 -translate-y-16'
+          enterTo='opacity-100'
+          leave='transition ease-in-out duration-300 transform'
+          leaveFrom='opacity-100'
+          leaveTo='opacity-0 translate-y-16'
+          unmount={false}>
+          {headerSlot}
+        </Transition>
 
         {/* 主区块 */}
         <main
@@ -128,21 +132,25 @@ const LayoutBase = props => {
             }>
             <div
               className={`${className || ''} w-full ${fullWidth ? '' : 'max-w-4xl'} h-full overflow-hidden`}>
-              <Transition
-                show={!onLoading}
-                appear={true}
-                enter='transition ease-in-out duration-700 transform order-first'
-                enterFrom='opacity-0 translate-y-16'
-                enterTo='opacity-100'
-                leave='transition ease-in-out duration-300 transform'
-                leaveFrom='opacity-100 translate-y-0'
-                leaveTo='opacity-0 -translate-y-16'
-                unmount={false}>
-                {/* 主区上部嵌入 */}
-                {slotTop}
+              {showArticleSwitchPlaceholder ? (
+                <ArticleSwitchPlaceholder />
+              ) : (
+                <Transition
+                  show={isArticleSlugPage ? true : !onLoading}
+                  appear={true}
+                  enter='transition ease-in-out duration-700 transform order-first'
+                  enterFrom='opacity-0 translate-y-16'
+                  enterTo='opacity-100'
+                  leave='transition ease-in-out duration-300 transform'
+                  leaveFrom='opacity-100 translate-y-0'
+                  leaveTo='opacity-0 -translate-y-16'
+                  unmount={false}>
+                  {/* 主区上部嵌入 */}
+                  {slotTop}
 
-                {children}
-              </Transition>
+                  {children}
+                </Transition>
+              )}
             </div>
 
             {/* 右侧栏 */}
@@ -242,85 +250,18 @@ const LayoutSearch = props => {
  * @returns
  */
 const LayoutArchive = props => {
-  const { archivePosts, categoryOptions, tagOptions } = props
-  const { locale } = useGlobal()
-  const totalPosts = archivePosts ? Object.values(archivePosts).reduce((acc, curr) => acc + (curr?.length || 0), 0) : 0
-
+  const { archivePosts } = props
   return (
     <div className='pt-8'>
       <Card className='w-full'>
-        <div className='bg-white md:p-12 p-3 min-h-full dark:bg-hexo-black-gray'>
-          {/* 顶部标题与统计区 */}
-          <div className='flex flex-col md:flex-row md:items-end justify-between mb-8 border-b pb-6'>
-            <div>
-              <div className='text-2xl font-bold dark:text-gray-300 mb-2'>
-                <i className='mr-3 fas fa-archive text-indigo-500' />
-                {locale?.MENU?.ARCHIVE || '归档'}
-              </div>
-              <div className='text-sm text-gray-500 dark:text-gray-400'>
-                📊 共计 <span className='font-bold text-indigo-500'>{totalPosts}</span> 篇内容
-              </div>
-            </div>
-          </div>
-
-          {/* 筛选区：分类与标签区分展示 */}
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-8 mb-12'>
-            {/* 左侧：分类 */}
-            <div>
-              <div className='text-xs font-bold text-gray-400 uppercase mb-4 tracking-wider flex items-center'>
-                <i className='mr-2 fas fa-folder-open' /> 分类浏览
-              </div>
-              <div className='flex flex-wrap gap-3'>
-                {categoryOptions?.map(category => (
-                  <Link key={category.name} href={`/category/${category.name}`} passHref legacyBehavior>
-                    <div className='group flex items-center px-3 py-1.5 bg-indigo-50 dark:bg-gray-800 rounded-lg text-sm hover:bg-indigo-500 transition-all cursor-pointer'>
-                      <span className='text-indigo-600 dark:text-indigo-300 group-hover:text-white'>{category.name}</span>
-                      <span className='ml-2 text-xs text-indigo-300 dark:text-gray-500 group-hover:text-indigo-100'>{category.count}</span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {/* 右侧：标签 */}
-            <div>
-              <div className='text-xs font-bold text-gray-400 uppercase mb-4 tracking-wider flex items-center'>
-                <i className='mr-2 fas fa-tags' /> 热门标签
-              </div>
-              <div className='flex flex-wrap gap-2'>
-                {tagOptions?.map(tag => (
-                  <Link key={tag.name} href={`/tag/${tag.name}`} passHref legacyBehavior>
-                    <div className='text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded hover:text-indigo-500 transition-all cursor-pointer'>
-                      # {tag.name}
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* 归档列表 */}
-          <div className='archive-list space-y-10'>
-            {archivePosts && Object.keys(archivePosts).length > 0 ? (
-              Object.keys(archivePosts).map(archiveTitle => (
-                <div key={archiveTitle}>
-                  <div className='text-2xl font-bold mb-6 flex items-center dark:text-gray-300'>
-                    <div className='w-2 h-8 bg-indigo-500 mr-4 rounded-full'></div>
-                    {archiveTitle}
-                  </div>
-                  <div className='grid grid-cols-1 gap-6'>
-                    {archivePosts[archiveTitle]?.map(post => (
-                      <BlogPostCard key={post.id} post={post} showSummary={true} />
-                    ))}
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className='text-center py-20 text-gray-400'>
-                正在加载文章内容...
-              </div>
-            )}
-          </div>
+        <div className='mb-10 pb-20 bg-white md:p-12 p-3 min-h-full dark:bg-hexo-black-gray'>
+          {Object.keys(archivePosts).map(archiveTitle => (
+            <BlogPostArchive
+              key={archiveTitle}
+              posts={archivePosts[archiveTitle]}
+              archiveTitle={archiveTitle}
+            />
+          ))}
         </div>
       </Card>
     </div>
@@ -449,7 +390,7 @@ const LayoutCategoryIndex = props => {
         <div id='category-list' className='duration-200 flex flex-wrap mx-8'>
           {categoryOptions?.map(category => {
             return (
-              <Link
+              <SmartLink
                 key={category.name}
                 href={`/category/${category.name}`}
                 passHref
@@ -461,7 +402,7 @@ const LayoutCategoryIndex = props => {
                   <i className='mr-4 fas fa-folder' /> {category.name}(
                   {category.count})
                 </div>
-              </Link>
+              </SmartLink>
             )
           })}
         </div>

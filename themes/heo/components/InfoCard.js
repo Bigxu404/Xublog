@@ -1,12 +1,42 @@
 import { ArrowRightCircle } from '@/components/HeroIcons'
 import LazyImage from '@/components/LazyImage'
 import { siteConfig } from '@/lib/config'
-import Link from 'next/link'
+import SmartLink from '@/components/SmartLink'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import CONFIG from '../config'
 import Announcement from './Announcement'
 import Card from './Card'
+
+export function normalizeInfoCardGreetings(value) {
+  if (Array.isArray(value)) {
+    return value.map(item => String(item).trim()).filter(Boolean)
+  }
+
+  if (typeof value !== 'string') {
+    return []
+  }
+
+  const trimmed = value.trim()
+  if (!trimmed) {
+    return []
+  }
+
+  if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+    try {
+      const parsed = JSON.parse(trimmed.replace(/'/g, '"'))
+      return normalizeInfoCardGreetings(parsed)
+    } catch {
+      return trimmed
+        .slice(1, -1)
+        .split(',')
+        .map(item => item.trim().replace(/^['"]|['"]$/g, ''))
+        .filter(Boolean)
+    }
+  }
+
+  return [trimmed]
+}
 
 /**
  * 社交信息卡
@@ -35,6 +65,7 @@ export function InfoCard(props) {
             src={siteInfo?.icon}
             className='rounded-full'
             width={isSlugPage ? 100 : 28}
+            height={isSlugPage ? 100 : 28}
             alt={siteConfig('AUTHOR')}
           />
         </div>
@@ -50,16 +81,16 @@ export function InfoCard(props) {
           {/* 两个社交按钮 */}
           {url1 && (
             <div className='w-10 text-center bg-indigo-400 p-2 rounded-full  transition-colors duration-200 dark:bg-yellow-500 dark:hover:bg-black hover:bg-white'>
-              <Link href={url1}>
+              <SmartLink href={url1}>
                 <i className={icon1} />
-              </Link>
+              </SmartLink>
             </div>
           )}
           {url2 && (
             <div className='bg-indigo-400 p-2 rounded-full w-10 items-center flex justify-center transition-colors duration-200 dark:bg-yellow-500 dark:hover:bg-black hover:bg-white'>
-              <Link href={url2}>
+              <SmartLink href={url2}>
                 <i className={icon2} />
-              </Link>
+              </SmartLink>
             </div>
           )}
         </div>
@@ -81,7 +112,7 @@ function MoreButton() {
     return <></>
   }
   return (
-    <Link href={url3}>
+    <SmartLink href={url3}>
       <div
         className={
           'group bg-indigo-400 dark:bg-yellow-500 hover:bg-white dark:hover:bg-black hover:text-black dark:hover:text-white flex items-center transition-colors duration-200 py-2 px-3 rounded-full space-x-1'
@@ -93,7 +124,7 @@ function MoreButton() {
         />
         <div className='font-bold'>{text3}</div>
       </div>
-    </Link>
+    </SmartLink>
   )
 }
 
@@ -101,8 +132,13 @@ function MoreButton() {
  * 欢迎语
  */
 function GreetingsWords() {
-  const greetings = siteConfig('HEO_INFOCARD_GREETINGS', null, CONFIG)
+  const greetings = normalizeInfoCardGreetings(
+    siteConfig('HEO_INFOCARD_GREETINGS', null, CONFIG)
+  )
   const [greeting, setGreeting] = useState(greetings[0])
+  if (greetings.length === 0) {
+    return null
+  }
   // 每次点击，随机获取greetings中的一个
   const handleChangeGreeting = () => {
     const randomIndex = Math.floor(Math.random() * greetings.length)

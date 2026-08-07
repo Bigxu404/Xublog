@@ -1,7 +1,7 @@
 import LazyImage from '@/components/LazyImage'
 import { useGlobal } from '@/lib/global'
 // import Image from 'next/image'
-import Link from 'next/link'
+import SmartLink from '@/components/SmartLink'
 import { useRouter } from 'next/router'
 
 /**
@@ -34,10 +34,10 @@ const LatestPostsGroup = ({ latestPosts, siteInfo }) => {
         const selected = currentPath === post?.href
 
         return (
-          <Link
+          <SmartLink
             key={post.id}
             title={post.title}
-            href={post?.href || '/'}
+            href={post?.href}
             passHref
             className={'my-3 flex'}>
             <div className='w-20 h-14 overflow-hidden relative'>
@@ -58,7 +58,7 @@ const LatestPostsGroup = ({ latestPosts, siteInfo }) => {
                 <div className='text-gray-500'>{post.lastEditedDay}</div>
               </div>
             </div>
-          </Link>
+          </SmartLink>
         )
       })}
     </>

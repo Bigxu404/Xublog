@@ -1,12 +1,12 @@
 // pages/for-agents.js
 import BLOG from '@/blog.config'
-import { getGlobalData } from '@/lib/db/getSiteData'
+import { fetchGlobalAllData } from '@/lib/db/SiteDataApi'
 import { siteConfig } from '@/lib/config'
 import Link from 'next/link'
 import Head from 'next/head'
 
 export const getStaticProps = async ctx => {
-  const siteData = await getGlobalData({ from: 'for-agents' })
+  const siteData = await fetchGlobalAllData({ from: 'for-agents' })
   
   // 筛选所有发布状态的文章
   const posts = siteData.allPages?.filter(p => p.type === 'Post' && p.status === 'Published') || []
