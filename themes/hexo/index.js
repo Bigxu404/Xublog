@@ -5,7 +5,6 @@ import ShareBar from '@/components/ShareBar'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { isBrowser } from '@/lib/utils'
-import { Transition } from '@headlessui/react'
 import dynamic from 'next/dynamic'
 import SmartLink from '@/components/SmartLink'
 import { useRouter } from 'next/router'
@@ -23,6 +22,8 @@ import Card from './components/Card'
 import Footer from './components/Footer'
 import Header from './components/Header'
 import Hero from './components/Hero'
+import MovieDetailHeader from './components/MovieDetailHeader'
+import MoviePosterWall from './components/MoviePosterWall'
 import PostHero from './components/PostHero'
 import RightFloatArea from './components/RightFloatArea'
 import SearchNav from './components/SearchNav'
@@ -104,19 +105,8 @@ const LayoutBase = props => {
         {/* 顶部导航 */}
         <Header {...props} />
 
-        {/* 顶部嵌入 */}
-        <Transition
-          show={!onLoading}
-          appear={true}
-          enter='transition ease-in-out duration-700 transform order-first'
-          enterFrom='opacity-0 -translate-y-16'
-          enterTo='opacity-100'
-          leave='transition ease-in-out duration-300 transform'
-          leaveFrom='opacity-100'
-          leaveTo='opacity-0 translate-y-16'
-          unmount={false}>
-          {headerSlot}
-        </Transition>
+        {/* 顶部嵌入：不与 onLoading 绑定，避免分页切换后 Hero/主栏卡在隐藏态 */}
+        {headerSlot}
 
         {/* 主区块 */}
         <main
@@ -135,21 +125,10 @@ const LayoutBase = props => {
               {showArticleSwitchPlaceholder ? (
                 <ArticleSwitchPlaceholder />
               ) : (
-                <Transition
-                  show={isArticleSlugPage ? true : !onLoading}
-                  appear={true}
-                  enter='transition ease-in-out duration-700 transform order-first'
-                  enterFrom='opacity-0 translate-y-16'
-                  enterTo='opacity-100'
-                  leave='transition ease-in-out duration-300 transform'
-                  leaveFrom='opacity-100 translate-y-0'
-                  leaveTo='opacity-0 -translate-y-16'
-                  unmount={false}>
-                  {/* 主区上部嵌入 */}
+                <>
                   {slotTop}
-
                   {children}
-                </Transition>
+                </>
               )}
             </div>
 
@@ -337,6 +316,71 @@ const LayoutSlug = props => {
 }
 
 /**
+ * 观影海报墙
+ */
+const LayoutMovieList = props => {
+  return (
+    <MoviePosterWall
+      movies={props.movies}
+      moviePeople={props.moviePeople}
+    />
+  )
+}
+
+/**
+ * 单部电影影评
+ */
+const LayoutMovie = props => {
+  const { post, lock, validPassword } = props
+  const router = useRouter()
+  const waiting404 = siteConfig('POST_WAITING_TIME_FOR_404') * 1000
+  useEffect(() => {
+    if (!post) {
+      setTimeout(() => {
+        if (isBrowser) {
+          const article = document.querySelector(
+            '#article-wrapper #notion-article'
+          )
+          if (!article) {
+            router.push('/movies').then(() => {
+              console.warn('找不到影评页面', router.asPath)
+            })
+          }
+        }
+      }, waiting404)
+    }
+  }, [post])
+
+  return (
+    <div className='w-full lg:hover:shadow lg:border rounded-t-xl lg:rounded-xl lg:px-2 lg:py-4 bg-white dark:bg-hexo-black-gray dark:border-black article'>
+      {lock && <ArticleLock validPassword={validPassword} />}
+
+      {!lock && post && (
+        <div className='overflow-x-auto flex-grow mx-auto md:w-full md:px-5 pt-4'>
+          <article
+            id='article-wrapper'
+            itemScope
+            itemType='https://schema.org/Movie'
+            className='subpixel-antialiased overflow-y-hidden'>
+            <section className='px-5 justify-center mx-auto max-w-2xl lg:max-w-full'>
+              <MovieDetailHeader post={post} />
+              {post && <NotionPage post={post} />}
+            </section>
+
+            <ShareBar post={post} />
+          </article>
+
+          <div className='pt-4 border-dashed'></div>
+          <div className='duration-200 overflow-x-auto bg-white dark:bg-hexo-black-gray px-3'>
+            <Comment frontMatter={post} />
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/**
  * 404
  * @param {*} props
  * @returns
@@ -443,6 +487,8 @@ export {
   LayoutBase,
   LayoutCategoryIndex,
   LayoutIndex,
+  LayoutMovie,
+  LayoutMovieList,
   LayoutPostList,
   LayoutSearch,
   LayoutSlug,

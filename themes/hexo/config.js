@@ -20,6 +20,7 @@ const CONFIG = {
   HEXO_MENU_TAG: true, // 显示标签
   HEXO_MENU_ARCHIVE: true, // 显示归档
   HEXO_MENU_SEARCH: true, // 显示搜索
+  HEXO_MENU_MOVIES: true, // 显示观影
   HEXO_MENU_RANDOM: true, // 显示随机跳转按钮
 
   HEXO_POST_LIST_COVER: true, // 列表显示文章封面
@@ -36,6 +37,8 @@ const CONFIG = {
   HEXO_ARTICLE_RECOMMEND: true, // 文章关联推荐
 
   HEXO_WIDGET_LATEST_POSTS: true, // 显示最新文章卡
+  HEXO_WIDGET_MOVIES: true, // 显示观影报告（横向海报滑动）
+  HEXO_WIDGET_MOVIES_COUNT: 8, // 侧栏最多展示几部
   HEXO_WIDGET_ANALYTICS: false, // 显示统计卡
   HEXO_WIDGET_TO_TOP: true,
   HEXO_WIDGET_TO_COMMENT: true, // 跳到评论区

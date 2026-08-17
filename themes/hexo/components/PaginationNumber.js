@@ -21,32 +21,44 @@ const PaginationNumber = ({ page, totalPage }) => {
 
   return (
     <div className='mt-10 mb-5 flex justify-center items-end font-medium text-indigo-400 duration-500 py-3 space-x-2'>
-      {/* 上一页 */}
-      <SmartLink
-        href={{
-          pathname:
-            currentPage === 2
-              ? `${pagePrefix}/`
-              : `${pagePrefix}/page/${currentPage - 1}`,
-          query: router.query.s ? { s: router.query.s } : {}
-        }}
-        rel='prev'
-        className={`${currentPage === 1 ? 'invisible' : 'block'} pb-0.5 hover:bg-indigo-400 hover:text-white w-6 text-center cursor-pointer duration-200 hover:font-bold`}>
-        <i className='fas fa-angle-left' />
-      </SmartLink>
+      {/* 上一页：第 1 页不渲染链接，避免 invisible 仍指向 /page/0 */}
+      {currentPage <= 1 ? (
+        <span className='invisible pb-0.5 w-6 text-center'>
+          <i className='fas fa-angle-left' />
+        </span>
+      ) : (
+        <SmartLink
+          href={{
+            pathname:
+              currentPage === 2
+                ? `${pagePrefix}/`
+                : `${pagePrefix}/page/${currentPage - 1}`,
+            query: router.query.s ? { s: router.query.s } : {}
+          }}
+          rel='prev'
+          className='pb-0.5 hover:bg-indigo-400 hover:text-white w-6 text-center cursor-pointer duration-200 hover:font-bold'>
+          <i className='fas fa-angle-left' />
+        </SmartLink>
+      )}
 
       {pages}
 
       {/* 下一页 */}
-      <SmartLink
-        href={{
-          pathname: `${pagePrefix}/page/${currentPage + 1}`,
-          query: router.query.s ? { s: router.query.s } : {}
-        }}
-        rel='next'
-        className={`${+showNext ? 'block' : 'invisible'} pb-0.5 hover:bg-indigo-400 hover:text-white w-6 text-center cursor-pointer duration-200 hover:font-bold`}>
-        <i className='fas fa-angle-right' />
-      </SmartLink>
+      {showNext ? (
+        <SmartLink
+          href={{
+            pathname: `${pagePrefix}/page/${currentPage + 1}`,
+            query: router.query.s ? { s: router.query.s } : {}
+          }}
+          rel='next'
+          className='pb-0.5 hover:bg-indigo-400 hover:text-white w-6 text-center cursor-pointer duration-200 hover:font-bold'>
+          <i className='fas fa-angle-right' />
+        </SmartLink>
+      ) : (
+        <span className='invisible pb-0.5 w-6 text-center'>
+          <i className='fas fa-angle-right' />
+        </span>
+      )}
     </div>
   )
 }

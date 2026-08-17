@@ -23,7 +23,14 @@ module.exports = {
       process.env.NEXT_PUBLIC_NOTION_PROPERTY_TYPE_MEMBER || 'Member', // 社区成员资料
     type_event:
       process.env.NEXT_PUBLIC_NOTION_PROPERTY_TYPE_EVENT || 'Event', // 社区活动
+    type_movie:
+      process.env.NEXT_PUBLIC_NOTION_PROPERTY_TYPE_MOVIE || 'Movie', // 观影记录
     title: process.env.NEXT_PUBLIC_NOTION_PROPERTY_TITLE || 'title', // 文章标题
+    rating: process.env.NEXT_PUBLIC_NOTION_PROPERTY_RATING || 'rating', // 观影评分（可选）
+    director:
+      process.env.NEXT_PUBLIC_NOTION_PROPERTY_DIRECTOR || 'director', // 导演（可选，文本或 select）
+    actors:
+      process.env.NEXT_PUBLIC_NOTION_PROPERTY_ACTORS || 'actors', // 主演（可选，multi-select 或逗号分隔文本）
     status: process.env.NEXT_PUBLIC_NOTION_PROPERTY_STATUS || 'status',
     status_publish:
       process.env.NEXT_PUBLIC_NOTION_PROPERTY_STATUS_PUBLISH || 'Published', // 当status状态值与此相同时为发布，可以为中文

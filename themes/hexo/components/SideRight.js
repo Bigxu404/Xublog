@@ -1,4 +1,3 @@
-import Live2D from '@/components/Live2D'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import dynamic from 'next/dynamic'
@@ -10,6 +9,7 @@ import Catalog from './Catalog'
 import CategoryGroup from './CategoryGroup'
 import { InfoCard } from './InfoCard'
 import LatestPostsGroup from './LatestPostsGroup'
+import MovieShelfCard from './MovieShelfCard'
 import TagGroups from './TagGroups'
 
 const HexoRecentComments = dynamic(() => import('./HexoRecentComments'))
@@ -69,6 +69,12 @@ export default function SideRight(props) {
           <AnalyticsCard {...props} />
         )}
 
+        {siteConfig('HEXO_WIDGET_MOVIES', true, CONFIG) && (
+          <Card>
+            <MovieShelfCard {...props} />
+          </Card>
+        )}
+
         {showCategory && (
           <Card>
             <div className='ml-2 mb-1 '>
@@ -100,7 +106,6 @@ export default function SideRight(props) {
 
         {rightAreaSlot}
         <FaceBookPage />
-        <Live2D />
       </div>
     </div>
   )

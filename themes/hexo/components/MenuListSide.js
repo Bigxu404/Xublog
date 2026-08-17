@@ -1,6 +1,7 @@
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import CONFIG from '../config'
+import { ensureMoviesMenuLink } from './ensureMoviesMenuLink'
 import { MenuItemCollapse } from './MenuItemCollapse'
 /**
  * 侧拉抽屉菜单
@@ -52,6 +53,10 @@ export const MenuListSide = props => {
   if (siteConfig('CUSTOM_MENU')) {
     links = customMenu
   }
+
+  links = ensureMoviesMenuLink(links, {
+    enabled: siteConfig('HEXO_MENU_MOVIES', true, CONFIG)
+  })
 
   if (!links || links.length === 0) {
     return null

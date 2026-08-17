@@ -1,6 +1,7 @@
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import CONFIG from '../config'
+import { ensureMoviesMenuLink } from './ensureMoviesMenuLink'
 import { MenuItemDrop } from './MenuItemDrop'
 
 export const MenuListTop = props => {
@@ -29,8 +30,6 @@ export const MenuListTop = props => {
       href: '/archive',
       show: siteConfig('HEXO_MENU_ARCHIVE', null, CONFIG)
     }
-    // { icon: 'fas fa-folder', name: locale.COMMON.CATEGORY, href: '/category', show: siteConfig('MENU_CATEGORY', null, CONFIG) },
-    // { icon: 'fas fa-tag', name: locale.COMMON.TAGS, href: '/tag', show: siteConfig('MENU_TAG', null, CONFIG) }
   ]
 
   if (customNav) {
@@ -47,6 +46,10 @@ export const MenuListTop = props => {
   if (siteConfig('CUSTOM_MENU')) {
     links = customMenu
   }
+
+  links = ensureMoviesMenuLink(links, {
+    enabled: siteConfig('HEXO_MENU_MOVIES', true, CONFIG)
+  })
 
   if (!links || links.length === 0) {
     return null
