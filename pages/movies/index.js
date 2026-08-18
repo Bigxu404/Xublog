@@ -27,6 +27,7 @@ function countNames(movies, pickNames) {
 
 function buildMovieFilters(movies) {
   return {
+    movieKinds: countNames(movies, movie => (movie.kind ? [movie.kind] : [])),
     movieDirectors: countNames(movies, movie =>
       movie.director ? [movie.director] : []
     ),
@@ -41,8 +42,9 @@ export async function getStaticProps({ locale }) {
   // TEMP: 本地预览样式；确认后删除 lib/mock/movieMock.js 与此处引用
   const movies = ENABLE_MOVIE_MOCK ? MOCK_MOVIES : props.allMovies || []
 
-  const { movieDirectors, movieActors } = buildMovieFilters(movies)
+  const { movieKinds, movieDirectors, movieActors } = buildMovieFilters(movies)
   props.movies = movies
+  props.movieKinds = movieKinds
   props.movieDirectors = movieDirectors
   props.movieActors = movieActors
 

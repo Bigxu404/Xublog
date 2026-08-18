@@ -27,6 +27,8 @@ module.exports = {
       process.env.NEXT_PUBLIC_NOTION_PROPERTY_TYPE_MOVIE || 'Movie', // 观影记录
     title: process.env.NEXT_PUBLIC_NOTION_PROPERTY_TITLE || 'title', // 文章标题
     rating: process.env.NEXT_PUBLIC_NOTION_PROPERTY_RATING || 'rating', // 观影评分（可选）
+    kind:
+      process.env.NEXT_PUBLIC_NOTION_PROPERTY_MOVIE_KIND || 'kind', // 观影类型（电影/剧集）
     director:
       process.env.NEXT_PUBLIC_NOTION_PROPERTY_DIRECTOR || 'director', // 导演（可选，文本或 select）
     actors:

@@ -7,14 +7,19 @@ import { useMemo, useState } from 'react'
  */
 const MoviePosterWall = ({
   movies = [],
+  movieKinds = [],
   movieDirectors = [],
   movieActors = []
 }) => {
+  const [activeKind, setActiveKind] = useState('全部')
   const [activeDirector, setActiveDirector] = useState('全部')
   const [activeActor, setActiveActor] = useState('全部')
 
   const filtered = useMemo(() => {
     return (movies || []).filter(movie => {
+      if (activeKind !== '全部' && (movie.kind || '') !== activeKind) {
+        return false
+      }
       if (activeDirector !== '全部' && movie.director !== activeDirector) {
         return false
       }
@@ -24,9 +29,16 @@ const MoviePosterWall = ({
       }
       return true
     })
-  }, [movies, activeDirector, activeActor])
+  }, [movies, activeKind, activeDirector, activeActor])
 
-  const hasFilters = movieDirectors.length > 0 || movieActors.length > 0
+  const hasFilters =
+    movieKinds.length > 0 || movieDirectors.length > 0 || movieActors.length > 0
+
+  const resetFilters = () => {
+    setActiveKind('全部')
+    setActiveDirector('全部')
+    setActiveActor('全部')
+  }
 
   return (
     <div className='w-full px-3 sm:px-4 md:px-0 lg:pr-8 pt-4 md:pt-8 pb-12 md:pb-16'>
@@ -40,26 +52,33 @@ const MoviePosterWall = ({
       </div>
 
       {hasFilters && (
-        <div className='mb-5 md:mb-8 space-y-3 md:space-y-4'>
-          {movieDirectors.length > 0 && (
-            <FilterRow
+        <div className='mb-5 md:mb-8 rounded-xl border border-gray-200 bg-white/70 p-3 md:p-4 dark:border-gray-800 dark:bg-hexo-black-gray/80'>
+          <div className='grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)_minmax(0,1.1fr)_auto] md:items-end'>
+            <FilterSelect
+              label='类型'
+              value={activeKind}
+              onChange={setActiveKind}
+              items={movieKinds}
+            />
+            <FilterSelect
               label='导演'
-              active={activeDirector}
+              value={activeDirector}
               onChange={setActiveDirector}
-              items={[
-                { name: '全部', count: movies.length },
-                ...movieDirectors
-              ]}
+              items={movieDirectors}
             />
-          )}
-          {movieActors.length > 0 && (
-            <FilterRow
+            <FilterSelect
               label='主演'
-              active={activeActor}
+              value={activeActor}
               onChange={setActiveActor}
-              items={[{ name: '全部', count: movies.length }, ...movieActors]}
+              items={movieActors}
             />
-          )}
+            <button
+              type='button'
+              onClick={resetFilters}
+              className='h-11 rounded-lg border border-gray-200 px-4 text-sm text-gray-600 transition-colors hover:border-gray-400 hover:text-gray-900 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:text-white'>
+              重置筛选
+            </button>
+          </div>
         </div>
       )}
 
@@ -78,36 +97,23 @@ const MoviePosterWall = ({
   )
 }
 
-const FilterRow = ({ label, items, active, onChange }) => {
+const FilterSelect = ({ label, items, value, onChange }) => {
   return (
-    <div className='flex items-center gap-2 md:block'>
-      <div className='shrink-0 w-9 md:w-auto text-xs tracking-wide text-gray-400 md:mb-2'>
-        {label}
-      </div>
-      <div className='min-w-0 flex-1 overflow-x-auto movie-filter-scroll touch-pan-x md:overflow-visible'>
-        <div className='flex w-max gap-2 pb-0.5 md:w-auto md:flex-wrap md:pb-0'>
-          {items.map(item => {
-            const selected = active === item.name
-            return (
-              <button
-                key={item.name}
-                type='button'
-                onClick={() => onChange(item.name)}
-                className={`shrink-0 whitespace-nowrap px-3 py-1.5 text-xs md:text-sm rounded-full border transition-colors touch-manipulation ${
-                  selected
-                    ? 'bg-black text-white border-black dark:bg-white dark:text-black dark:border-white'
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400 dark:bg-hexo-black-gray dark:text-gray-300 dark:border-gray-700'
-                }`}>
-                {item.name}
-                {typeof item.count === 'number' && (
-                  <span className='ml-1 opacity-60'>{item.count}</span>
-                )}
-              </button>
-            )
-          })}
-        </div>
-      </div>
-    </div>
+    <label className='block min-w-0'>
+      <div className='mb-1.5 text-xs tracking-wide text-gray-400'>{label}</div>
+      <select
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className='w-full min-w-0 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-700 outline-none transition-colors focus:border-gray-400 dark:border-gray-700 dark:bg-hexo-black-gray dark:text-gray-200 dark:focus:border-gray-500'>
+        <option value='全部'>全部</option>
+        {items.map(item => (
+          <option key={item.name} value={item.name}>
+            {item.name}
+            {typeof item.count === 'number' ? ` (${item.count})` : ''}
+          </option>
+        ))}
+      </select>
+    </label>
   )
 }
 
@@ -118,6 +124,7 @@ const MoviePosterCard = ({ movie }) => {
     movie.director ||
     (Array.isArray(movie.actors) && movie.actors[0]) ||
     ''
+  const kind = movie.kind || ''
 
   return (
     <SmartLink href={movie.href || '#'} className='group block min-w-0'>
@@ -128,6 +135,11 @@ const MoviePosterCard = ({ movie }) => {
           className='h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105'
         />
         <div className='absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-90' />
+        {kind ? (
+          <div className='absolute left-2 top-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] text-white backdrop-blur md:left-3 md:top-3'>
+            {kind}
+          </div>
+        ) : null}
         <div className='absolute bottom-0 left-0 right-0 p-2 md:p-3 text-white'>
           <div className='font-semibold text-xs sm:text-sm md:text-base line-clamp-2'>
             {movie.title}

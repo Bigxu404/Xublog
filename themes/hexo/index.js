@@ -322,6 +322,7 @@ const LayoutMovieList = props => {
   return (
     <MoviePosterWall
       movies={props.movies}
+      movieKinds={props.movieKinds}
       movieDirectors={props.movieDirectors}
       movieActors={props.movieActors}
     />
