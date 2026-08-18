@@ -1,35 +1,23 @@
-import { siteConfig } from '@/lib/config'
-import { useGlobal } from '@/lib/global'
 import SmartLink from '@/components/SmartLink'
-import CONFIG from '../config'
 
 const MenuGroupCard = props => {
-  const { postCount, categoryOptions, tagOptions } = props
-  const { locale } = useGlobal()
+  const { postCount, allMovies = [], movies = [] } = props
+  const movieCount = allMovies.length || movies.length || 0
   const archiveSlot = <div className='text-center'>{postCount}</div>
-  const categorySlot = (
-    <div className='text-center'>{categoryOptions?.length}</div>
-  )
-  const tagSlot = <div className='text-center'>{tagOptions?.length}</div>
+  const movieSlot = <div className='text-center'>{movieCount}</div>
 
   const links = [
     {
-      name: locale.COMMON.ARTICLE,
+      name: '文章数量',
       href: '/archive',
       slot: archiveSlot,
-      show: siteConfig('HEXO_MENU_ARCHIVE', null, CONFIG)
+      show: true
     },
     {
-      name: locale.COMMON.CATEGORY,
-      href: '/category',
-      slot: categorySlot,
-      show: siteConfig('HEXO_MENU_CATEGORY', null, CONFIG)
-    },
-    {
-      name: locale.COMMON.TAGS,
-      href: '/tag',
-      slot: tagSlot,
-      show: siteConfig('HEXO_MENU_TAG', null, CONFIG)
+      name: '观影数量',
+      href: '/movies',
+      slot: movieSlot,
+      show: true
     }
   ]
 
