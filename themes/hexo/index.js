@@ -353,7 +353,7 @@ const LayoutMovie = props => {
   }, [post])
 
   return (
-    <div className='w-full lg:hover:shadow lg:border rounded-t-xl lg:rounded-xl lg:px-2 lg:py-4 bg-white dark:bg-hexo-black-gray dark:border-black article'>
+    <div className='w-full lg:hover:shadow lg:border rounded-t-xl lg:rounded-xl lg:pl-2 lg:pr-8 lg:py-4 bg-white dark:bg-hexo-black-gray dark:border-black article'>
       {lock && <ArticleLock validPassword={validPassword} />}
 
       {!lock && post && (

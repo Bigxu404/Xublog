@@ -29,7 +29,7 @@ const MoviePosterWall = ({
   const hasFilters = movieDirectors.length > 0 || movieActors.length > 0
 
   return (
-    <div className='w-full px-3 sm:px-4 md:px-0 pt-4 md:pt-8 pb-12 md:pb-16'>
+    <div className='w-full px-3 sm:px-4 md:px-0 lg:pr-8 pt-4 md:pt-8 pb-12 md:pb-16'>
       <div className='mb-5 md:mb-8'>
         <h1 className='text-2xl md:text-3xl font-bold dark:text-gray-100'>
           观影
