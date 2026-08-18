@@ -116,11 +116,7 @@ const MoviePosterCard = ({ movie, index }) => {
     ''
 
   return (
-    <SmartLink
-      href={movie.href || '#'}
-      className='group block'
-      data-aos='fade-up'
-      data-aos-delay={Math.min(index * 40, 240)}>
+    <SmartLink href={movie.href || '#'} className='group block'>
       <div className='relative aspect-[2/3] overflow-hidden rounded-xl border border-gray-100 dark:border-black bg-gray-100 dark:bg-black shadow-sm'>
         <LazyImage
           src={cover}
