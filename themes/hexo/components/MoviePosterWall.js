@@ -3,24 +3,30 @@ import SmartLink from '@/components/SmartLink'
 import { useMemo, useState } from 'react'
 
 /**
- * 观影海报墙 + 导演/主演单一维度筛选
+ * 观影海报墙 + 导演、主演分行筛选
  */
-const MoviePosterWall = ({ movies = [], moviePeople = [] }) => {
-  const [activePerson, setActivePerson] = useState('全部')
+const MoviePosterWall = ({
+  movies = [],
+  movieDirectors = [],
+  movieActors = []
+}) => {
+  const [activeDirector, setActiveDirector] = useState('全部')
+  const [activeActor, setActiveActor] = useState('全部')
 
   const filtered = useMemo(() => {
     return (movies || []).filter(movie => {
-      if (activePerson === '全部') return true
-      const names =
-        movie.people?.length > 0
-          ? movie.people
-          : [
-              movie.director,
-              ...(Array.isArray(movie.actors) ? movie.actors : [])
-            ].filter(Boolean)
-      return names.includes(activePerson)
+      if (activeDirector !== '全部' && movie.director !== activeDirector) {
+        return false
+      }
+      if (activeActor !== '全部') {
+        const actors = Array.isArray(movie.actors) ? movie.actors : []
+        if (!actors.includes(activeActor)) return false
+      }
+      return true
     })
-  }, [movies, activePerson])
+  }, [movies, activeDirector, activeActor])
+
+  const hasFilters = movieDirectors.length > 0 || movieActors.length > 0
 
   return (
     <div className='w-full pt-8 pb-16'>
@@ -31,14 +37,27 @@ const MoviePosterWall = ({ movies = [], moviePeople = [] }) => {
         </p>
       </div>
 
-      {moviePeople.length > 0 && (
-        <div className='mb-8'>
-          <FilterRow
-            label='导演 / 主演'
-            active={activePerson}
-            onChange={setActivePerson}
-            items={[{ name: '全部', count: movies.length }, ...moviePeople]}
-          />
+      {hasFilters && (
+        <div className='mb-8 space-y-4'>
+          {movieDirectors.length > 0 && (
+            <FilterRow
+              label='导演'
+              active={activeDirector}
+              onChange={setActiveDirector}
+              items={[
+                { name: '全部', count: movies.length },
+                ...movieDirectors
+              ]}
+            />
+          )}
+          {movieActors.length > 0 && (
+            <FilterRow
+              label='主演'
+              active={activeActor}
+              onChange={setActiveActor}
+              items={[{ name: '全部', count: movies.length }, ...movieActors]}
+            />
+          )}
         </div>
       )}
 

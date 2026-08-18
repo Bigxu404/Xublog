@@ -52,7 +52,7 @@ export default function ForAgents({ siteInfo, posts }) {
               </p>
               <hr className="my-6 border-gray-300 dark:border-gray-600" />
               <div className="text-sm space-y-2">
-                <p>作者阿旭，金山办公 AI 产品经理。记录 AI 产品思考、LLM 架构学习、Vibe Coding 实践。</p>
+                <p>作者阿旭，百度AI产品经理。记录 AI 产品思考、LLM 架构学习、Vibe Coding 实践。</p>
                 <p>博客已有 {posts.length} 篇文章。</p>
               </div>
             </div>

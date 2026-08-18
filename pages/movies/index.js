@@ -12,25 +12,28 @@ const MoviesIndex = props => {
   return <DynamicLayout theme={theme} layoutName='LayoutMovieList' {...props} />
 }
 
-/** 单一维度：导演 + 主演合并为「人物」筛选项 */
-function buildMoviePeople(movies) {
-  const peopleSet = new Map()
+function countNames(movies, pickNames) {
+  const nameSet = new Map()
   movies.forEach(movie => {
-    const names =
-      movie.people?.length > 0
-        ? movie.people
-        : [
-            movie.director,
-            ...(Array.isArray(movie.actors) ? movie.actors : [])
-          ].filter(Boolean)
-    names.forEach(name => {
-      peopleSet.set(name, (peopleSet.get(name) || 0) + 1)
+    pickNames(movie).forEach(name => {
+      if (!name) return
+      nameSet.set(name, (nameSet.get(name) || 0) + 1)
     })
   })
-
-  return Array.from(peopleSet.entries())
+  return Array.from(nameSet.entries())
     .map(([name, count]) => ({ name, count }))
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'zh'))
+}
+
+function buildMovieFilters(movies) {
+  return {
+    movieDirectors: countNames(movies, movie =>
+      movie.director ? [movie.director] : []
+    ),
+    movieActors: countNames(movies, movie =>
+      Array.isArray(movie.actors) ? movie.actors.filter(Boolean) : []
+    )
+  }
 }
 
 export async function getStaticProps({ locale }) {
@@ -38,8 +41,10 @@ export async function getStaticProps({ locale }) {
   // TEMP: 本地预览样式；确认后删除 lib/mock/movieMock.js 与此处引用
   const movies = ENABLE_MOVIE_MOCK ? MOCK_MOVIES : props.allMovies || []
 
+  const { movieDirectors, movieActors } = buildMovieFilters(movies)
   props.movies = movies
-  props.moviePeople = buildMoviePeople(movies)
+  props.movieDirectors = movieDirectors
+  props.movieActors = movieActors
 
   delete props.allPages
   delete props.allMovies
