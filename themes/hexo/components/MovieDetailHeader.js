@@ -22,17 +22,17 @@ const MovieDetailHeader = ({ post }) => {
       : []
 
   return (
-    <div className='w-full mb-8'>
-      <div className='mb-4'>
+    <div className='w-full mb-6 md:mb-8'>
+      <div className='mb-3 md:mb-4'>
         <SmartLink
           href='/movies'
-          className='text-sm text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white'>
+          className='inline-flex min-h-[44px] items-center text-sm text-gray-500 hover:text-black dark:text-gray-400 dark:hover:text-white'>
           ← 返回观影墙
         </SmartLink>
       </div>
 
-      <div className='flex flex-col md:flex-row gap-6 md:gap-8'>
-        <div className='w-40 md:w-52 shrink-0 mx-auto md:mx-0'>
+      <div className='flex flex-col md:flex-row gap-4 md:gap-8'>
+        <div className='w-28 sm:w-36 md:w-52 shrink-0 mx-auto md:mx-0'>
           <div className='aspect-[2/3] overflow-hidden rounded-xl border dark:border-black shadow'>
             <LazyImage
               src={cover}
@@ -42,12 +42,12 @@ const MovieDetailHeader = ({ post }) => {
           </div>
         </div>
 
-        <div className='flex-1 min-w-0'>
-          <h1 className='text-2xl md:text-3xl font-bold dark:text-gray-100'>
+        <div className='flex-1 min-w-0 text-center md:text-left'>
+          <h1 className='text-xl sm:text-2xl md:text-3xl font-bold break-words dark:text-gray-100'>
             {post.title}
           </h1>
 
-          <div className='mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-gray-400'>
+          <div className='mt-3 flex flex-wrap justify-center md:justify-start gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-gray-400'>
             {post.publishDay ? <span>观看于 {post.publishDay}</span> : null}
             {rating ? <span>评分 ★ {rating}</span> : null}
           </div>
@@ -55,13 +55,13 @@ const MovieDetailHeader = ({ post }) => {
           {(director || actors.length > 0) && (
             <div className='mt-3 space-y-1 text-sm text-gray-600 dark:text-gray-300'>
               {director ? (
-                <div>
+                <div className='break-words'>
                   <span className='text-gray-400 dark:text-gray-500'>导演 </span>
                   {director}
                 </div>
               ) : null}
               {actors.length > 0 ? (
-                <div>
+                <div className='break-words'>
                   <span className='text-gray-400 dark:text-gray-500'>主演 </span>
                   {actors.join('、')}
                 </div>
@@ -70,7 +70,7 @@ const MovieDetailHeader = ({ post }) => {
           )}
 
           {post.summary ? (
-            <p className='mt-4 text-gray-600 dark:text-gray-300 leading-relaxed'>
+            <p className='mt-4 text-sm md:text-base text-gray-600 dark:text-gray-300 leading-relaxed'>
               {post.summary}
             </p>
           ) : null}

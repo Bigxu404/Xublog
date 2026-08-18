@@ -357,13 +357,13 @@ const LayoutMovie = props => {
       {lock && <ArticleLock validPassword={validPassword} />}
 
       {!lock && post && (
-        <div className='overflow-x-auto flex-grow mx-auto md:w-full md:px-5 pt-4'>
+        <div className='overflow-x-hidden md:overflow-x-auto flex-grow mx-auto w-full px-3 md:px-5 pt-2 md:pt-4'>
           <article
             id='article-wrapper'
             itemScope
             itemType='https://schema.org/Movie'
             className='subpixel-antialiased overflow-y-hidden'>
-            <section className='px-5 justify-center mx-auto max-w-2xl lg:max-w-full'>
+            <section className='px-1 md:px-5 justify-center mx-auto max-w-2xl lg:max-w-full'>
               <MovieDetailHeader post={post} />
               {post && <NotionPage post={post} />}
             </section>

@@ -69,12 +69,15 @@ const Style = () => {
         scrollbar-color: #49b1f5 transparent
     }
 
-    /* 观影报告横向滑动：隐藏滚动条，保留滑动 */
-    .movie-shelf-scroll {
+    /* 观影报告 / 筛选条横向滑动：隐藏滚动条，保留滑动 */
+    .movie-shelf-scroll,
+    .movie-filter-scroll {
         scrollbar-width: none;
         -ms-overflow-style: none;
+        -webkit-overflow-scrolling: touch;
     }
-    .movie-shelf-scroll::-webkit-scrollbar {
+    .movie-shelf-scroll::-webkit-scrollbar,
+    .movie-filter-scroll::-webkit-scrollbar {
         display: none;
         width: 0;
         height: 0;
