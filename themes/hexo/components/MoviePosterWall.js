@@ -32,7 +32,7 @@ const MoviePosterWall = ({
     <div className='w-full px-3 sm:px-4 md:px-0 lg:pr-8 pt-4 md:pt-8 pb-12 md:pb-16'>
       <div className='mb-5 md:mb-8'>
         <h1 className='text-2xl md:text-3xl font-bold dark:text-gray-100'>
-          观影
+          观影记录
         </h1>
         <p className='mt-1.5 md:mt-2 text-sm text-gray-500 dark:text-gray-400'>
           已看 {movies.length} 部 · 点海报进入影评
