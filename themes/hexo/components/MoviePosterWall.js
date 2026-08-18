@@ -75,7 +75,7 @@ const MoviePosterWall = ({
             <button
               type='button'
               onClick={resetFilters}
-              className='h-[3.75rem] shrink-0 rounded-lg border border-gray-200 px-4 text-xs text-gray-600 transition-colors hover:border-gray-400 hover:text-gray-900 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:text-white'>
+              className='h-[1.25rem] shrink-0 rounded-lg border border-gray-200 px-3 text-[11px] leading-none text-gray-600 transition-colors hover:border-gray-400 hover:text-gray-900 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:text-white'>
               重置筛选
             </button>
           </div>
@@ -106,7 +106,7 @@ const FilterSelect = ({ label, items, value, onChange }) => {
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className='h-[3.75rem] min-w-0 flex-1 rounded-lg border border-gray-200 bg-transparent px-3 text-[11px] leading-none text-gray-700 outline-none transition-colors focus:border-gray-400 dark:border-gray-700 dark:text-gray-200 dark:focus:border-gray-500'>
+        className='h-[1.25rem] min-w-0 flex-1 rounded-lg border border-gray-200 bg-transparent px-2 text-[11px] leading-none text-gray-700 outline-none transition-colors focus:border-gray-400 dark:border-gray-700 dark:text-gray-200 dark:focus:border-gray-500'>
         <option value='全部'>全部</option>
         {items.map(item => (
           <option key={item.name} value={item.name}>
