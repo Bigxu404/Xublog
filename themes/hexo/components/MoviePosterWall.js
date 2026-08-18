@@ -52,8 +52,8 @@ const MoviePosterWall = ({
       </div>
 
       {hasFilters && (
-        <div className='mb-5 md:mb-8 rounded-xl border border-gray-200 bg-white/70 p-3 md:p-4 dark:border-gray-800 dark:bg-hexo-black-gray/80'>
-          <div className='grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)_minmax(0,1.1fr)_auto] md:items-end'>
+        <div className='mb-5 md:mb-8'>
+          <div className='flex flex-col gap-3 md:flex-row md:items-center md:gap-5'>
             <FilterSelect
               label='类型'
               value={activeKind}
@@ -75,7 +75,7 @@ const MoviePosterWall = ({
             <button
               type='button'
               onClick={resetFilters}
-              className='h-11 rounded-lg border border-gray-200 px-4 text-sm text-gray-600 transition-colors hover:border-gray-400 hover:text-gray-900 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:text-white'>
+              className='h-[3.75rem] shrink-0 rounded-lg border border-gray-200 px-4 text-xs text-gray-600 transition-colors hover:border-gray-400 hover:text-gray-900 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-500 dark:hover:text-white'>
               重置筛选
             </button>
           </div>
@@ -99,12 +99,14 @@ const MoviePosterWall = ({
 
 const FilterSelect = ({ label, items, value, onChange }) => {
   return (
-    <label className='block min-w-0'>
-      <div className='mb-1.5 text-xs tracking-wide text-gray-400'>{label}</div>
+    <label className='flex min-w-0 flex-1 items-center gap-2'>
+      <span className='shrink-0 text-sm text-gray-500 dark:text-gray-400'>
+        {label}
+      </span>
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className='w-full min-w-0 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-700 outline-none transition-colors focus:border-gray-400 dark:border-gray-700 dark:bg-hexo-black-gray dark:text-gray-200 dark:focus:border-gray-500'>
+        className='h-[3.75rem] min-w-0 flex-1 rounded-lg border border-gray-200 bg-transparent px-3 text-[11px] leading-none text-gray-700 outline-none transition-colors focus:border-gray-400 dark:border-gray-700 dark:text-gray-200 dark:focus:border-gray-500'>
         <option value='全部'>全部</option>
         {items.map(item => (
           <option key={item.name} value={item.name}>
@@ -124,7 +126,6 @@ const MoviePosterCard = ({ movie }) => {
     movie.director ||
     (Array.isArray(movie.actors) && movie.actors[0]) ||
     ''
-  const kind = movie.kind || ''
 
   return (
     <SmartLink href={movie.href || '#'} className='group block min-w-0'>
@@ -135,11 +136,6 @@ const MoviePosterCard = ({ movie }) => {
           className='h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105'
         />
         <div className='absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-90' />
-        {kind ? (
-          <div className='absolute left-2 top-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] text-white backdrop-blur md:left-3 md:top-3'>
-            {kind}
-          </div>
-        ) : null}
         <div className='absolute bottom-0 left-0 right-0 p-2 md:p-3 text-white'>
           <div className='font-semibold text-xs sm:text-sm md:text-base line-clamp-2'>
             {movie.title}
